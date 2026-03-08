@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Panel – RS Yadav Smart Bus</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#e52e2e;--dark:#080c14;--navy:#0f1623;--card:#141d2e;
+  --gold:#f5a623;--white:#fff;--muted:#64748b;--green:#22c55e;
+  --blue:#3b82f6;--orange:#f97316;--border:rgba(255,255,255,.08);
+}
+body{font-family:'Sora',sans-serif;background:var(--dark);color:white;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--navy);border-right:1px solid var(--border);
+  padding:24px 0;position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.sb-logo-mark{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,var(--red),#ff6535);
+  display:grid;place-items:center;font-size:18px;margin-bottom:10px}
+.sb-logo-name{font-size:.88rem;font-weight:800}
+.sb-logo-tag{font-size:.65rem;color:var(--muted);margin-top:2px}
+.sb-nav{flex:1;padding:0 12px;overflow-y:auto}
+.sb-section{font-size:.65rem;color:var(--muted);font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:12px 8px 6px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  cursor:pointer;transition:all .2s;margin-bottom:2px;font-size:.83rem;font-weight:600;color:rgba(255,255,255,.6)}
+.sb-item:hover{background:rgba(255,255,255,.06);color:white}
+.sb-item.active{background:rgba(229,46,46,.15);color:var(--red);border:1px solid rgba(229,46,46,.2)}
+.sb-item-icon{font-size:1rem;width:20px;text-align:center}
+.sb-badge{margin-left:auto;background:var(--red);color:white;font-size:.65rem;
+  font-weight:800;padding:2px 8px;border-radius:10px}
+.sb-footer{padding:16px 20px;border-top:1px solid var(--border);margin-top:auto}
+.admin-info{display:flex;align-items:center;gap:10px}
+.admin-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--gold));
+  display:grid;place-items:center;font-weight:800;font-size:.88rem}
+.admin-name{font-size:.82rem;font-weight:700}
+.admin-role{font-size:.68rem;color:var(--muted)}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;padding:28px;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.page-title{font-size:1.5rem;font-weight:800}
+.page-sub{font-size:.82rem;color:var(--muted);margin-top:4px}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.tb-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);color:white;
+  padding:8px 16px;border-radius:8px;font-family:'Sora',sans-serif;font-size:.8rem;
+  font-weight:600;cursor:pointer;transition:all .2s}
+.tb-btn:hover{background:rgba(255,255,255,.12)}
+.tb-btn.primary{background:var(--red);border-color:var(--red)}
+.tb-btn.primary:hover{background:#c72020}
+
+/* STATS CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.red::before{background:linear-gradient(90deg,var(--red),#ff6535)}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),#16a34a)}
+.stat-card.gold::before{background:linear-gradient(90deg,var(--gold),#f97316)}
+.stat-card.blue::before{background:linear-gradient(90deg,var(--blue),#8b5cf6)}
+.stat-icon{font-size:1.6rem;margin-bottom:12px}
+.stat-num{font-size:2rem;font-weight:800;line-height:1;margin-bottom:6px}
+.stat-label{font-size:.75rem;color:var(--muted)}
+.stat-change{font-size:.72rem;margin-top:8px;display:flex;align-items:center;gap:4px}
+.up{color:var(--green)}.down{color:var(--red)}
+
+/* TABS */
+.tab-bar{display:flex;gap:6px;background:var(--navy);padding:6px;border-radius:12px;
+  margin-bottom:24px;width:fit-content;border:1px solid var(--border)}
+.tab{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;
+  font-family:'Sora',sans-serif;font-size:.8rem;font-weight:600;
+  color:var(--muted);background:transparent;transition:all .2s}
+.tab.active{background:var(--card);color:white;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* GRID 2-COL */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* PANEL */
+.panel{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:.9rem;font-weight:700}
+.panel-body{padding:20px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:12px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
+  border-radius:20px;font-size:.7rem;font-weight:700}
+.status-confirmed{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.status-pending{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+.status-cancelled{background:rgba(229,46,46,.12);color:#ff8080;border:1px solid rgba(229,46,46,.2)}
+.action-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:rgba(255,255,255,.7);
+  padding:4px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;
+  font-family:'Sora',sans-serif;transition:all .2s}
+.action-btn:hover{background:rgba(255,255,255,.12);color:white}
+.action-btn.danger{color:#ff8080}
+.action-btn.danger:hover{background:rgba(229,46,46,.15);border-color:rgba(229,46,46,.3)}
+
+/* SEARCH & FILTER */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{background:var(--navy);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 14px;font-family:'Sora',sans-serif;font-size:.82rem;color:white;
+  outline:none;transition:border .2s;min-width:220px}
+.search-input:focus{border-color:var(--red)}
+.filter-select{background:var(--navy);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-family:'Sora',sans-serif;font-size:.82rem;color:white;outline:none}
+
+/* MINI CHART */
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:16px}
+.bar{flex:1;border-radius:4px 4px 0 0;background:rgba(229,46,46,.3);transition:all .2s;cursor:pointer;position:relative}
+.bar:hover{background:var(--red)}
+.bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--muted);white-space:nowrap}
+
+/* BUS SCHEDULE */
+.schedule-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.schedule-item:last-child{border:none}
+.sched-time{font-size:.88rem;font-weight:700;min-width:50px}
+.sched-route{font-size:.82rem;font-weight:600;margin-bottom:3px}
+.sched-info{font-size:.72rem;color:var(--muted)}
+.sched-status{margin-left:auto;text-align:right}
+.sched-occupy{font-size:.82rem;font-weight:700}
+.occupy-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:4px;width:80px}
+.occupy-fill{height:100%;border-radius:2px;background:var(--green)}
+
+/* REVENUE CARD */
+.rev-big{font-size:2.5rem;font-weight:800;color:var(--green);margin:8px 0}
+.rev-sub{font-size:.78rem;color:var(--muted)}
+
+/* QUICK ACTIONS */
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.qa-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px;cursor:pointer;transition:all .2s;text-align:left}
+.qa-btn:hover{border-color:var(--red);background:rgba(229,46,46,.05)}
+.qa-icon{font-size:1.4rem;margin-bottom:6px}
+.qa-label{font-size:.82rem;font-weight:700}
+.qa-sub{font-size:.7rem;color:var(--muted);margin-top:2px}
+
+/* NOTIFICATION DOT */
+.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;margin-left:4px;display:inline-block}
+
+/* VIEWS */
+.view{display:none}
+.view.active{display:block}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .grid2{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">🚌</div>
+    <div class="sb-logo-name">RS Yadav Smart Bus</div>
+    <div class="sb-logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <div class="sb-item active" onclick="showView('dashboard',this)"><span class="sb-item-icon">📊</span> Dashboard</div>
+    <div class="sb-item" onclick="showView('bookings',this)"><span class="sb-item-icon">🎫</span> Bookings <span class="sb-badge">12</span></div>
+    <div class="sb-section">Operations</div>
+    <div class="sb-item" onclick="showView('buses',this)"><span class="sb-item-icon">🚌</span> Bus Fleet</div>
+    <div class="sb-item" onclick="showView('routes',this)"><span class="sb-item-icon">🗺️</span> Routes</div>
+    <div class="sb-item" onclick="showView('schedule',this)"><span class="sb-item-icon">📅</span> Schedule</div>
+    <div class="sb-section">Finance</div>
+    <div class="sb-item" onclick="showView('revenue',this)"><span class="sb-item-icon">💰</span> Revenue</div>
+    <div class="sb-item" onclick="showView('offers',this)"><span class="sb-item-icon">🎁</span> Offers</div>
+    <div class="sb-section">Support</div>
+    <div class="sb-item" onclick="showView('customers',this)"><span class="sb-item-icon">👥</span> Customers</div>
+    <div class="sb-item" onclick="showView('complaints',this)"><span class="sb-item-icon">📩</span> Complaints <span class="sb-badge">3</span></div>
+  </nav>
+  <div class="sb-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div><div class="admin-name">Admin</div><div class="admin-role">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="topbar">
+      <div><div class="page-title">Dashboard 📊</div><div class="page-sub">Aaj ka overview — 8 March 2026</div></div>
+      <div class="topbar-right">
+        <button class="tb-btn" onclick="alert('Report download ho raha hai...')">📥 Export Report</button>
+        <button class="tb-btn primary" onclick="alert('Nayi booking add karo...')">+ New Booking</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card red"><div class="stat-icon">🎫</div><div class="stat-num">248</div><div class="stat-label">Aaj ki Total Bookings</div><div class="stat-change up">↑ 12% aaj</div></div>
+      <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-num">₹1.82L</div><div class="stat-label">Aaj ka Revenue</div><div class="stat-change up">↑ 8% aaj</div></div>
+      <div class="stat-card gold"><div class="stat-icon">🚌</div><div class="stat-num">18/22</div><div class="stat-label">Buses Active</div><div class="stat-change">4 maintenance pe</div></div>
+      <div class="stat-card blue"><div class="stat-icon">⭐</div><div class="stat-num">4.8</div><div class="stat-label">Avg Customer Rating</div><div class="stat-change up">↑ 0.2 is mahine</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📈 Weekly Bookings</div><div style="font-size:.75rem;color:var(--muted)">Last 7 days</div></div>
+        <div class="panel-body">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:.78rem;color:var(--muted)">Total this week</span>
+            <span style="font-size:.88rem;font-weight:700;color:var(--green)">1,642 bookings</span>
+          </div>
+          <div class="chart-bars" id="chart"></div>
+          <div style="height:24px"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🚌 Today's Buses</div><a href="#" onclick="showView('schedule',document.querySelector('[onclick*=schedule]'))" style="font-size:.75rem;color:var(--red);text-decoration:none">Sab Dekho →</a></div>
+        <div class="panel-body" id="schedule-mini"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">🎫 Recent Bookings</div>
+        <a href="#" onclick="showView('bookings',null)" style="font-size:.75rem;color:var(--red);text-decoration:none">Sab Dekho →</a>
+      </div>
+      <div class="panel-body table-wrap" id="recent-bookings"></div>
+    </div>
+  </div>
+
+  <!-- BOOKINGS -->
+  <div class="view" id="view-bookings">
+    <div class="topbar">
+      <div><div class="page-title">All Bookings 🎫</div><div class="page-sub">Sabhi bookings manage karo</div></div>
+      <div class="topbar-right">
+        <button class="tb-btn" onclick="alert('CSV download ho rahi hai...')">📥 Export CSV</button>
+        <button class="tb-btn primary" onclick="alert('Manual booking add karo...')">+ Add Booking</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-body">
+        <div class="toolbar">
+          <input class="search-input" type="text" placeholder="🔍 Booking ID ya naam se dhundo..." oninput="filterBookings(this.value)"/>
+          <select class="filter-select" onchange="filterByStatus(this.value)">
+            <option value="">All Status</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <select class="filter-select">
+            <option>All Routes</option>
+            <option>Delhi → Azamgarh</option>
+            <option>Delhi → Lucknow</option>
+            <option>Delhi → Ayodhya</option>
+          </select>
+        </div>
+        <div class="table-wrap" id="full-bookings-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUSES -->
+  <div class="view" id="view-buses">
+    <div class="topbar">
+      <div><div class="page-title">Bus Fleet 🚌</div><div class="page-sub">Sabhi buses ka status</div></div>
+      <button class="tb-btn primary" onclick="alert('Nayi bus add karo...')">+ Add Bus</button>
+    </div>
+    <div id="buses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+  </div>
+
+  <!-- ROUTES -->
+  <div class="view" id="view-routes">
+    <div class="topbar">
+      <div><div class="page-title">Routes 🗺️</div><div class="page-sub">Sare routes manage karo</div></div>
+      <button class="tb-btn primary" onclick="alert('Nayi route add karo...')">+ Add Route</button>
+    </div>
+    <div class="panel">
+      <div class="panel-body table-wrap" id="routes-table"></div>
+    </div>
+  </div>
+
+  <!-- REVENUE -->
+  <div class="view" id="view-revenue">
+    <div class="topbar">
+      <div><div class="page-title">Revenue 💰</div><div class="page-sub">Financial overview</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card green"><div class="stat-icon">📅</div><div class="stat-num">₹1.82L</div><div class="stat-label">Aaj</div></div>
+      <div class="stat-card green"><div class="stat-icon">📆</div><div class="stat-num">₹12.4L</div><div class="stat-label">Is Hafta</div></div>
+      <div class="stat-card green"><div class="stat-icon">🗓️</div><div class="stat-num">₹48.6L</div><div class="stat-label">Is Mahine</div></div>
+      <div class="stat-card green"><div class="stat-icon">📊</div><div class="stat-num">₹5.2Cr</div><div class="stat-label">Is Saal</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><div class="panel-title">💳 Payment Methods</div></div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.85rem">UPI</span><div style="display:flex;align-items:center;gap:10px"><div style="height:6px;width:150px;background:rgba(255,255,255,.1);border-radius:3px"><div style="height:100%;width:65%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:.82rem;font-weight:700">65%</span></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.85rem">Card</span><div style="display:flex;align-items:center;gap:10px"><div style="height:6px;width:150px;background:rgba(255,255,255,.1);border-radius:3px"><div style="height:100%;width:22%;background:var(--red);border-radius:3px"></div></div><span style="font-size:.82rem;font-weight:700">22%</span></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.85rem">Net Banking</span><div style="display:flex;align-items:center;gap:10px"><div style="height:6px;width:150px;background:rgba(255,255,255,.1);border-radius:3px"><div style="height:100%;width:8%;background:var(--gold);border-radius:3px"></div></div><span style="font-size:.82rem;font-weight:700">8%</span></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.85rem">Wallet</span><div style="display:flex;align-items:center;gap:10px"><div style="height:6px;width:150px;background:rgba(255,255,255,.1);border-radius:3px"><div style="height:100%;width:5%;background:var(--green);border-radius:3px"></div></div><span style="font-size:.82rem;font-weight:700">5%</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-head"><div class="panel-title">🔝 Top Routes by Revenue</div></div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:.85rem">Delhi → Azamgarh</span><span style="color:var(--green);font-weight:700;font-size:.85rem">₹18.2L</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:.85rem">Delhi → Lucknow</span><span style="color:var(--green);font-weight:700;font-size:.85rem">₹12.6L</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:.85rem">Delhi → Ayodhya</span><span style="color:var(--green);font-weight:700;font-size:.85rem">₹9.4L</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:.85rem">Lucknow → Gorakhpur</span><span style="color:var(--green);font-weight:700;font-size:.85rem">₹5.1L</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLAINTS -->
+  <div class="view" id="view-complaints">
+    <div class="topbar"><div><div class="page-title">Complaints 📩</div><div class="page-sub">Customer issues resolve karo</div></div></div>
+    <div class="panel">
+      <div class="panel-body" id="complaints-list"></div>
+    </div>
+  </div>
+
+  <!-- OTHER VIEWS PLACEHOLDER -->
+  <div class="view" id="view-schedule"><div class="topbar"><div><div class="page-title">Schedule 📅</div></div></div><div class="panel"><div class="panel-body" id="full-schedule"></div></div></div>
+  <div class="view" id="view-customers"><div class="topbar"><div><div class="page-title">Customers 👥</div></div></div><div class="panel"><div class="panel-body" id="customers-table"></div></div></div>
+  <div class="view" id="view-offers"><div class="topbar"><div><div class="page-title">Offers 🎁</div></div><button class="tb-btn primary" onclick="alert('Nayi offer banao...')">+ New Offer</button></div><div id="offers-list"></div></div>
+
+</main>
+
+<script>
+// DATA
+const bookings = [
+  {id:'RSY20260308001',name:'Ramesh Kumar',route:'Delhi → Azamgarh',date:'08 Mar',seats:'L5,L6',amount:'₹1,170',status:'Confirmed',phone:'9876543210'},
+  {id:'RSY20260308002',name:'Priya Singh',route:'Delhi → Lucknow',date:'08 Mar',seats:'L1',amount:'₹342',status:'Confirmed',phone:'9812345678'},
+  {id:'RSY20260308003',name:'Suresh Sharma',route:'Azamgarh → Delhi',date:'09 Mar',seats:'U3',amount:'₹585',status:'Pending',phone:'9898765432'},
+  {id:'RSY20260308004',name:'Anita Verma',route:'Delhi → Ayodhya',date:'08 Mar',seats:'L2',amount:'₹378',status:'Confirmed',phone:'9765432109'},
+  {id:'RSY20260308005',name:'Mahesh Gupta',route:'Delhi → Varanasi',date:'10 Mar',seats:'L7,L8',amount:'₹936',status:'Confirmed',phone:'9654321098'},
+  {id:'RSY20260308006',name:'Kavya Patel',route:'Delhi → Agra',date:'08 Mar',seats:'U5',amount:'₹252',status:'Cancelled',phone:'9543210987'},
+  {id:'RSY20260308007',name:'Ravi Yadav',route:'Delhi → Azamgarh',date:'09 Mar',seats:'U1,U2',amount:'₹1,170',status:'Pending',phone:'9432109876'},
+  {id:'RSY20260308008',name:'Seema Dubey',route:'Lucknow → Gorakhpur',date:'08 Mar',seats:'L4',amount:'₹288',status:'Confirmed',phone:'9321098765'},
+];
+
+const buses = [
+  {num:'UP32-AT-1234',name:'RS Yadav Express 1',type:'AC Sleeper',seats:36,status:'Active',route:'Delhi → Azamgarh',occupy:78},
+  {num:'UP32-AT-1235',name:'RS Yadav Express 2',type:'AC Sleeper',seats:36,status:'Active',route:'Delhi → Lucknow',occupy:92},
+  {num:'UP32-AT-1236',name:'RS Yadav Deluxe 1',type:'AC Seater',seats:45,status:'Active',route:'Delhi → Ayodhya',occupy:65},
+  {num:'UP32-AT-1237',name:'RS Yadav Premium 1',type:'Luxury Sleeper',seats:20,status:'Maintenance',route:'-',occupy:0},
+  {num:'UP32-AT-1238',name:'RS Yadav Deluxe 2',type:'AC Seater',seats:45,status:'Active',route:'Lucknow → Gorakhpur',occupy:45},
+  {num:'UP32-AT-1239',name:'RS Yadav Night 1',type:'Semi-Sleeper',seats:40,status:'Active',route:'Delhi → Varanasi',occupy:88},
+];
+
+const routes = [
+  {id:'R001',from:'Delhi',to:'Azamgarh',dist:'700 km',time:'10h 30m',fare:'₹450-950',buses:8,status:'Active'},
+  {id:'R002',from:'Delhi',to:'Lucknow',dist:'550 km',time:'8h',fare:'₹380-780',buses:6,status:'Active'},
+  {id:'R003',from:'Delhi',to:'Ayodhya',dist:'620 km',time:'9h',fare:'₹420-850',buses:4,status:'Active'},
+  {id:'R004',from:'Lucknow',to:'Gorakhpur',dist:'270 km',time:'4h 30m',fare:'₹280-550',buses:3,status:'Active'},
+  {id:'R005',from:'Delhi',to:'Varanasi',dist:'800 km',time:'12h',fare:'₹520-1100',buses:5,status:'Active'},
+  {id:'R006',from:'Delhi',to:'Agra',dist:'200 km',time:'3h',fare:'₹180-380',buses:2,status:'Active'},
+];
+
+const schedules = [
+  {time:'20:00',route:'Delhi → Azamgarh',bus:'RS Yadav Premium',occupy:95},
+  {time:'21:00',route:'Delhi → Lucknow',bus:'RS Yadav Express',occupy:78},
+  {time:'21:30',route:'Azamgarh → Delhi',bus:'RS Yadav Deluxe',occupy:60},
+  {time:'22:00',route:'Delhi → Ayodhya',bus:'RS Yadav Express 2',occupy:85},
+  {time:'23:59',route:'Delhi → Varanasi',bus:'RS Yadav Night',occupy:72},
+];
+
+const weekData = [180,220,195,260,240,285,248];
+const weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// BUILD UI
+function buildChart(){
+  const max = Math.max(...weekData);
+  document.getElementById('chart').innerHTML = weekData.map((v,i)=>`
+    <div class="bar" style="height:${(v/max)*100}%" title="${weekDays[i]}: ${v} bookings">
+      <span class="bar-label">${weekDays[i]}</span>
+    </div>`).join('');
+}
+
+function buildScheduleMini(){
+  document.getElementById('schedule-mini').innerHTML = schedules.slice(0,4).map(s=>`
+    <div class="schedule-item">
+      <div class="sched-time">${s.time}</div>
+      <div style="flex:1"><div class="sched-route">${s.route}</div><div class="sched-info">${s.bus}</div></div>
+      <div class="sched-status">
+        <div class="sched-occupy" style="color:${s.occupy>80?'#ff8080':'var(--green)'}">${s.occupy}%</div>
+        <div class="occupy-bar"><div class="occupy-fill" style="width:${s.occupy}%;background:${s.occupy>80?'var(--red)':'var(--green)'}"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+function buildBookingsTable(data, id){
+  const table = `<table><thead><tr>
+    <th>Booking ID</th><th>Passenger</th><th>Route</th><th>Date</th><th>Seats</th><th>Amount</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>${data.map(b=>`<tr>
+    <td style="color:var(--gold);font-weight:700;font-size:.75rem">${b.id}</td>
+    <td><div style="font-weight:600">${b.name}</div><div style="font-size:.7rem;color:var(--muted)">${b.phone}</div></td>
+    <td style="font-size:.8rem">${b.route}</td>
+    <td style="font-size:.8rem">${b.date}</td>
+    <td><span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:6px;font-size:.75rem">${b.seats}</span></td>
+    <td style="color:var(--green);font-weight:700">${b.amount}</td>
+    <td><span class="status-badge status-${b.status.toLowerCase()}">${b.status==='Confirmed'?'✓ ':b.status==='Pending'?'⏳ ':'✗ '}${b.status}</span></td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="action-btn" onclick="viewBooking('${b.id}')">View</button>
+      ${b.status==='Confirmed'?`<button class="action-btn danger" onclick="cancelBooking('${b.id}')">Cancel</button>`:''}
+    </td>
+  </tr>`).join('')}</tbody></table>`;
+  document.getElementById(id).innerHTML = table;
+}
+
+function buildBusesGrid(){
+  document.getElementById('buses-grid').innerHTML = buses.map(b=>`
+    <div class="panel">
+      <div class="panel-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+          <div>
+            <div style="font-weight:700;font-size:.9rem">${b.name}</div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:3px">${b.num}</div>
+          </div>
+          <span class="status-badge ${b.status==='Active'?'status-confirmed':'status-pending'}">${b.status==='Active'?'🟢':'🔧'} ${b.status}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px"><div style="font-size:.68rem;color:var(--muted)">Type</div><div style="font-size:.82rem;font-weight:700;margin-top:3px">${b.type}</div></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px"><div style="font-size:.68rem;color:var(--muted)">Seats</div><div style="font-size:.82rem;font-weight:700;margin-top:3px">${b.seats}</div></div>
+        </div>
+        ${b.status==='Active'?`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.75rem;color:var(--muted)">Occupancy</span><span style="font-size:.75rem;font-weight:700;color:${b.occupy>80?'#ff8080':'var(--green)'}">${b.occupy}%</span></div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px"><div style="height:100%;width:${b.occupy}%;background:${b.occupy>80?'var(--red)':'var(--green)'};border-radius:3px;transition:width .5s"></div></div><div style="font-size:.7rem;color:var(--muted);margin-top:6px">Route: ${b.route}</div></div>`:'<div style="font-size:.8rem;color:var(--gold);margin-bottom:10px">🔧 Maintenance mein hai</div>'}
+        <div style="display:flex;gap:8px"><button class="action-btn" onclick="alert('Bus details: ${b.name}')">Details</button><button class="action-btn" onclick="alert('Track: ${b.num}')">📍 Track</button></div>
+      </div>
+    </div>`).join('');
+}
+
+function buildRoutesTable(){
+  document.getElementById('routes-table').innerHTML = `<table><thead><tr>
+    <th>ID</th><th>From</th><th>To</th><th>Distance</th><th>Duration</th><th>Fare Range</th><th>Buses</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>${routes.map(r=>`<tr>
+    <td style="color:var(--gold);font-size:.75rem">${r.id}</td>
+    <td style="font-weight:600">${r.from}</td>
+    <td style="font-weight:600">${r.to}</td>
+    <td style="font-size:.8rem">${r.dist}</td>
+    <td style="font-size:.8rem">${r.time}</td>
+    <td style="color:var(--green);font-weight:700;font-size:.82rem">${r.fare}</td>
+    <td><span style="background:rgba(59,130,246,.12);color:var(--blue);padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:700">${r.buses} buses</span></td>
+    <td><span class="status-badge status-confirmed">✓ ${r.status}</span></td>
+    <td style="display:flex;gap:6px"><button class="action-btn" onclick="alert('Edit route ${r.id}')">Edit</button><button class="action-btn danger" onclick="alert('Deactivate ${r.id}?')">Disable</button></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+function buildComplaints(){
+  const complaints = [
+    {id:'C001',name:'Ramesh Kumar',issue:'AC band ho gaya tha beech raaste mein',date:'07 Mar',priority:'High',status:'Open'},
+    {id:'C002',name:'Priya Singh',issue:'Driver ka behavior theek nahi tha',date:'06 Mar',priority:'Medium',status:'In Progress'},
+    {id:'C003',name:'Suresh Sharma',issue:'Bus 45 min late aayi',date:'08 Mar',priority:'Low',status:'Open'},
+  ];
+  document.getElementById('complaints-list').innerHTML = complaints.map(c=>`
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:18px;margin-bottom:12px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:700">${c.name} <span style="font-size:.72rem;color:var(--muted);margin-left:6px">${c.id}</span></div>
+          <div style="font-size:.85rem;color:rgba(255,255,255,.7);margin-top:6px">"${c.issue}"</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:6px">📅 ${c.date}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="background:${c.priority==='High'?'rgba(229,46,46,.15)':c.priority==='Medium'?'rgba(245,166,35,.12)':'rgba(34,197,94,.12)'};color:${c.priority==='High'?'#ff8080':c.priority==='Medium'?'var(--gold)':'var(--green)'};padding:3px 12px;border-radius:10px;font-size:.72rem;font-weight:700">${c.priority}</span>
+          <span class="status-badge ${c.status==='Open'?'status-pending':'status-confirmed'}">${c.status}</span>
+          <button class="action-btn" onclick="alert('Resolve complaint ${c.id}')">Resolve</button>
+          <button class="action-btn" onclick="alert('Reply to ${c.name}')">Reply</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function viewBooking(id){ alert(`Booking Details:\nID: ${id}\n\n(Real system mein full details dikhengi)`) }
+function cancelBooking(id){
+  if(confirm(`${id} ko cancel karna chahte ho?`)) alert('Booking cancelled. Refund 3-5 days mein milega.');
+}
+function filterBookings(q){
+  const filtered = bookings.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())||b.id.toLowerCase().includes(q.toLowerCase()));
+  buildBookingsTable(filtered,'full-bookings-table');
+}
+function filterByStatus(s){
+  const filtered = s ? bookings.filter(b=>b.status===s) : bookings;
+  buildBookingsTable(filtered,'full-bookings-table');
+}
+
+function showView(name, el) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  // Lazy build
+  if(name==='bookings') buildBookingsTable(bookings,'full-bookings-table');
+  if(name==='buses') buildBusesGrid();
+  if(name==='routes') buildRoutesTable();
+  if(name==='complaints') buildComplaints();
+}
+
+// INIT
+buildChart();
+buildScheduleMini();
+buildBookingsTable(bookings.slice(0,5),'recent-bookings');
+</script>
+</body>
+</html>
